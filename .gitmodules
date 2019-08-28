@@ -1,12 +1,12 @@
 [submodule "Arduino/OperatorInterface/lib/Adafruit_TLC5947"]
-	path = Arduino/OperatorInterface/lib/Adafruit_TLC5947
+	path = Arduino/OperatorInterface/src/lib/Adafruit_TLC5947
 	url = https://github.com/e-bonner/Adafruit_TLC5947
 [submodule "Arduino/OperatorInterface/lib/MCP23017"]
-	path = Arduino/OperatorInterface/lib/MCP23017
+	path = Arduino/OperatorInterface/src/lib/MCP23017
 	url = https://github.com/adafruit/Adafruit-MCP23017-Arduino-Library
 [submodule "Arduino/OperatorInterface/lib/ArduinoJoystickLibrary"]
-	path = Arduino/OperatorInterface/lib/ArduinoJoystickLibrary
+	path = Arduino/OperatorInterface/src/lib/ArduinoJoystickLibrary
 	url = https://github.com/e-bonner/ArduinoJoystickLibrary
 [submodule "Arduino/OperatorInterface/lib/LiquidCrystal_I2C"]
-	path = Arduino/OperatorInterface/lib/LiquidCrystal_I2C
+	path = Arduino/OperatorInterface/src/lib/LiquidCrystal_I2C
 	url = https://github.com/johnrickman/LiquidCrystal_I2C
