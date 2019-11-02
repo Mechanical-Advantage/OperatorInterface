@@ -10,3 +10,6 @@
 [submodule "Arduino/OperatorInterface/lib/LiquidCrystal_I2C"]
 	path = Arduino/OperatorInterface/src/lib/LiquidCrystal_I2C
 	url = https://github.com/johnrickman/LiquidCrystal_I2C
+[submodule "Arduino/OperatorInterface/src/lib/FastLED"]
+	path = Arduino/OperatorInterface/src/lib/FastLED
+	url = https://github.com/FastLED/FastLED
