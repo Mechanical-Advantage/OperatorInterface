@@ -33,7 +33,11 @@
 #define NEOPIXEL_PIN 9
 #define NEOPIXEL_COUNT 7
 #define NEOPIXEL_TYPE WS2812B
-#define NEOPIXEL_COLOR_ORDER GRB
+#define NEOPIXEL_COLOR_ORDER GRB 
+
+#define SET_BITS 2 
+#define DATA_MASK 0x3f 
+#define SERIAL_READ_INTERVAL 10
 
 Joystick_ Joystick = Joystick_(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_GAMEPAD, BUTTON_COUNT, 0, true,
                                true, true, true, true, true, false, false, false, false, false);
@@ -113,7 +117,7 @@ void setup()
     pixelTest();
 
     // Test all the possible LED states
-    SET_LEDSTATE(14, LEDSTATE_DIM);
+    /* SET_LEDSTATE(14, LEDSTATE_DIM);
     SET_LEDSTATE(16, LEDSTATE_MED);
     SET_LEDSTATE(18, LEDSTATE_ON);
     SET_LEDSTATE(15, LEDSTATE_DIM);
@@ -122,7 +126,7 @@ void setup()
     SET_LEDSTATE(6, LEDSTATE_BLINK_SLOW);
     SET_LEDSTATE(7, LEDSTATE_BLINK_FAST);
     SET_LEDSTATE(8, LEDSTATE_PULSE_SLOW);
-    SET_LEDSTATE(9, LEDSTATE_PULSE_FAST);
+    SET_LEDSTATE(9, LEDSTATE_PULSE_FAST); */
 }
 
 void pixelTest(void)
@@ -209,6 +213,39 @@ void updateLEDState()
     tlc->write();
 }
 
+
+
+void readSerialData() {
+  byte serialByte;
+  int available = Serial.available();
+
+
+  if (available > 0) { 
+      serialByte = Serial.read();
+    //Serial.println();
+    // Get the set index
+    byte setIndex = serialByte>>(8-SET_BITS);
+    // Clear set index from byte
+    serialByte &= DATA_MASK;
+    for (byte thisPin = 0; thisPin < 8-SET_BITS; thisPin++) {
+      byte ledIndex = thisPin+((8-SET_BITS)*setIndex);
+      if (ledIndex < MAX_LED) {
+        if (serialByte >= 1<<(7-SET_BITS-thisPin)) {
+          SET_LEDSTATE(ledIndex, LEDSTATE_ON);
+          /*Serial.print("Setting LED ");
+          Serial.print(String(ledPins[ledIndex]));
+          Serial.println(" to HIGH");*/
+          serialByte-=1<<(7-SET_BITS-thisPin);
+        } else {
+          SET_LEDSTATE(ledIndex, LEDSTATE_OFF);
+          /*Serial.print("Setting LED ");
+          Serial.print(String(ledPins[ledIndex]));
+          Serial.println(" to LOW");*/
+        }
+      }
+    }
+  }
+}
 void loop()
 {
     char line[21];
@@ -271,6 +308,11 @@ void loop()
     EVERY_N_MILLISECONDS(LED_UPDATE_INTERVAL)
     {
         updateLEDState();
+    }
+
+    EVERY_N_MILLISECONDS(SERIAL_READ_INTERVAL ) 
+    {
+        readSerialData();
     }
 
     // E Stop
