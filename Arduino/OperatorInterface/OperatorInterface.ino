@@ -2,6 +2,7 @@
 #include "src/lib/MCP23017/Adafruit_MCP23017.h"
 #include "src/lib/ArduinoJoystickLibrary/Joystick/src/Joystick.h"
 #include "src/lib/LiquidCrystal_I2C/LiquidCrystal_I2C.h"
+#include "OISerialProtocol.h"
 #include <Keyboard.h>
 #include "src/lib/FastLED/FastLED.h" // Using FastLED for broad compatibility and general feature set
 #include "LEDState.h"                // Custom header that provides tracking of LED states
@@ -13,7 +14,7 @@
 #define ANALOG_INPUT_COUNT 6
 #define MCP_INTERUPT_PIN 0
 #define MCP_ADDR 0x20
-#define SERIAL_BAUD_RATE 9600
+#define SERIAL_BAUD_RATE 115200
 
 #define MCP23017_INPUTS 16
 #define MCP23017_USE_INTERRUPTS 0
@@ -34,6 +35,8 @@
 #define NEOPIXEL_COUNT 7
 #define NEOPIXEL_TYPE WS2812B
 #define NEOPIXEL_COLOR_ORDER GRB
+
+DECLARE_LEDSTATE_STORAGE;
 
 Joystick_ Joystick = Joystick_(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_GAMEPAD, BUTTON_COUNT, 0, true,
                                true, true, true, true, true, false, false, false, false, false);
@@ -107,13 +110,15 @@ void setup()
     updateLEDState();
     delay(1000);
     SET_ALL_LEDS_OFF;
-    updateLEDState();
+    updateLEDState(); 
+    // Clear lcd
+    lcd.clear();
 
     // Light up the neopixels (test)
-    pixelTest();
+    //pixelTest();
 
     // Test all the possible LED states
-    SET_LEDSTATE(14, LEDSTATE_DIM);
+   /*  SET_LEDSTATE(14, LEDSTATE_DIM);
     SET_LEDSTATE(16, LEDSTATE_MED);
     SET_LEDSTATE(18, LEDSTATE_ON);
     SET_LEDSTATE(15, LEDSTATE_DIM);
@@ -122,7 +127,7 @@ void setup()
     SET_LEDSTATE(6, LEDSTATE_BLINK_SLOW);
     SET_LEDSTATE(7, LEDSTATE_BLINK_FAST);
     SET_LEDSTATE(8, LEDSTATE_PULSE_SLOW);
-    SET_LEDSTATE(9, LEDSTATE_PULSE_FAST);
+    SET_LEDSTATE(9, LEDSTATE_PULSE_FAST); */
 }
 
 void pixelTest(void)
@@ -215,6 +220,8 @@ void loop()
     uint16_t mcp_input;
     byte button;
 
+    readSerialData();
+
     // Directly connected buttons (1-8)
     for (button = 0; button < DIRECT_BUTTON_COUNT; button++)
     {
@@ -259,12 +266,12 @@ void loop()
         (Joystick.*axisFuncs[input])(analogRead(input));
     }
 
-    EVERY_N_MILLISECONDS(100)
+   /*  EVERY_N_MILLISECONDS(100)
     {
         lcd.setCursor(0, 3);
         sprintf(line, "%4d %4d %4d %4d", analogRead(0), analogRead(1), analogRead(2), analogRead(3));
         lcd.print(line);
-    }
+    } */
 
     Joystick.sendState();
 
@@ -282,6 +289,7 @@ void loop()
         lcd.print("** Emergency Stop **");
         pixelSetAll(CRGB::Red);
     }
+    
     else if (eStopPressed && digitalRead(E_STOP_PIN))
     {
         Keyboard.release(' ');

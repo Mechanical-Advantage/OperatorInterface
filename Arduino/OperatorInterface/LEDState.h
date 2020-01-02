@@ -50,7 +50,10 @@
 //   X XXX 023 022 021 020  <-- array[4]
 
 // The actual storage array
-uint16_t ledState[STATE_LOCATIONS];  
+extern uint16_t ledState[STATE_LOCATIONS];
+// Must have exactly one declaration of the storage (in one file)
+#define DECLARE_LEDSTATE_STORAGE uint16_t ledState[STATE_LOCATIONS] 
+//#define DECLARE_LEDSTATE_STORAGE_EXTERN extern uint16_t ledState[STATE_LOCATIONS] 
 
 // Which array element (location) holds this LED's value
 #define LED_LOC_IDX(led) ((int)(led/LEDS_PER_LOCATION))
