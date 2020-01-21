@@ -49,25 +49,25 @@ void processCmd()
   byte lcd_x;
   byte lcd_y;
 
-  lcd.setCursor(0, 3);
-  lcd.print("CMD:");
+  //lcd.setCursor(0, 3);
+  //lcd.print("CMD:");
   if (cmd == OISERIAL_CMD_LED_SET)
   {
     // This is an LED control command.  
     // The next 2 bytes indicate which LED and what value to set.
     SET_LEDSTATE(oiMsgBuf[OISERIAL_CMD_IDX + 1], oiMsgBuf[OISERIAL_CMD_IDX + 2]);
-    lcd.print("LED set");
+    //lcd.print("LED set");
   }
   else if (cmd == OISERIAL_CMD_LCD_MSG) 
   {
-    lcd.print("LCD set");
+    //lcd.print("LCD set");
     lcd_y = oiMsgBuf[OISERIAL_CMD_IDX + 1] & OISERIAL_LCD_Y_MASK;
     lcd_x = (oiMsgBuf[OISERIAL_CMD_IDX + 1] & OISERIAL_LCD_X_MASK) >> OISERIAL_LCD_X_RIGHT_SHIFT;
     // Insert a null in place of the checksum to denote end of string
     //oiMsgBuf[oiMsgBuf[OISERIAL_SIZE_IDX] - 1] = 0;
     lcd.setCursor(lcd_x, lcd_y);
 
-    for (uint16_t charidx = OISERIAL_CMD_IDX + 2; charidx < oiMsgBuf[OISERIAL_SIZE_IDX]; charidx++)
+    for (uint16_t charidx = OISERIAL_CMD_IDX + 2; charidx < oiMsgBuf[OISERIAL_SIZE_IDX] - 1; charidx++)
     {
       lcd.print(static_cast<char>(oiMsgBuf[charidx]));
     }
@@ -97,8 +97,8 @@ void readSerialData() {
   oiMsgBuf[oiMsgBufIdx] = Serial.read();
   char buf[20];
 
-  lcd.setCursor(16, 3);
-  lcd.print(itoa(oiMsgBuf[oiMsgBufIdx], buf, 10));
+  //lcd.setCursor(16, 3);
+  //lcd.print(itoa(oiMsgBuf[oiMsgBufIdx], buf, 10));
 
   switch (oiMsgBufIdx)
   {
@@ -106,8 +106,8 @@ void readSerialData() {
     // Check for receiving an invalid start byte
     if (oiMsgBuf[oiMsgBufIdx] != OISERIAL_START_BYTE)
       {
-        lcd.setCursor(0, 1);
-        lcd.print("ST");
+        //lcd.setCursor(0, 1);
+        //lcd.print("ST");
         sendNack();
         return;
       }
@@ -117,8 +117,8 @@ void readSerialData() {
     if (oiMsgBuf[oiMsgBufIdx] < OISERIAL_MIN_MSG_SIZE ||
         oiMsgBuf[oiMsgBufIdx] > OISERIAL_MAX_MSG_SIZE)
     {
-      lcd.setCursor(0, 1);
-      lcd.print("SZ");
+      //lcd.setCursor(0, 1);
+      //lcd.print("SZ");
       sendNack();
       return;
     }
@@ -128,8 +128,8 @@ void readSerialData() {
   case OISERIAL_CMD_IDX:
     if (oiMsgBuf[oiMsgBufIdx] > OISERIAL_MAX_CMD_VAL)
     {
-      lcd.setCursor(0, 1);
-      lcd.print("CMD");
+      //lcd.setCursor(0, 1);
+      //lcd.print("CMD");
       sendNack();
       return;
     }
@@ -141,10 +141,10 @@ void readSerialData() {
     break;
   }
 
-  lcd.setCursor(0, 2);
+  /* lcd.setCursor(0, 2);
   lcd.print("    ");
   lcd.setCursor(0, 2);
-  lcd.print(itoa(oiMsgBytesRemaining, buf, 10));
+  lcd.print(itoa(oiMsgBytesRemaining, buf, 10)); */
 
   if (oiMsgBytesRemaining == 0)
   {

@@ -6,7 +6,7 @@ from serial import Serial, SerialException
 from enum import Enum
 
 NTSERVER = "127.0.0.1"
-SERIAL_PORT = "COM7"  # COM7 in Windows
+SERIAL_PORT = "COM3"  # COM7 in Windows
 SERIAL_BAUD = 115200
 
 class OISerialCommand(Enum):
@@ -49,7 +49,8 @@ def setLED(id, led_state):
 def setMessage(x, y, msg):
   payload = []
   payload.append(x << OISERIAL_LCD_X_SHIFT & (y & OISERIAL_LCD_Y_MASK))
-  payload += [bytes(character, encoding='ascii')[0] for character in msg]
+  payload += [bytes(character, encoding='ascii')[0] for character in msg] 
+  print ("Payload'{}' " .format(payload[1:]))
   arduino.write(assembleMessage(OISerialCommand.LCD_MSG, payload))
   get_response()
 
@@ -195,21 +196,23 @@ print("Connecting to NetworkTables...")
 while NetworkTables.getRemoteAddress() is None:
     sleep(1)
 print("Connected to NetworkTables")
-table.addTableListener(update_values, immediateNotify=True, key="OI LEDs")
+#table.addTableListener(update_values, immediateNotify=True, key="OI LEDs")
 
 lastStateConnected = True
 while True:
     sleep(1)
-    if not lastStateConnected and NetworkTables.getRemoteAddress() is not None:
+    """ if not lastStateConnected and NetworkTables.getRemoteAddress() is not None:
         lastStateConnected = True
         print("Re-connected to NetworkTables")
     elif lastStateConnected and NetworkTables.getRemoteAddress() is None:
         lastStateConnected = False
-        print("Lost connection to NetworkTables")
+        print("Lost connection to NetworkTables") """
 
     if not arduino_connected:
         connect_to_arduino();
 
-    #for i in range(0, 1):
-    #  setLED(i, OILEDState.LEDSTATE_MED)
+    for i in range(0, 1):
+      setLED(i, OILEDState.LEDSTATE_MED)
     setMessage(0, 0, "Test Message");
+
+    print ("It works")
