@@ -62,17 +62,25 @@ void processCmd()
   {
     //lcd.print("LCD set");
     lcd_y = oiMsgBuf[OISERIAL_CMD_IDX + 1] & OISERIAL_LCD_Y_MASK;
-    lcd_x = (oiMsgBuf[OISERIAL_CMD_IDX + 1] & OISERIAL_LCD_X_MASK) >> OISERIAL_LCD_X_RIGHT_SHIFT;
+    lcd_x = (oiMsgBuf[OISERIAL_CMD_IDX + 1] & OISERIAL_LCD_X_MASK) >> OISERIAL_LCD_X_RIGHT_SHIFT; 
+
+    char buf[20];
+    lcd.setCursor(3, 2);
+    lcd.print(itoa(lcd_x, buf, 10)); 
+
+    //lcd.setCursor(10, 2);
+    //lcd.print(itoa(lcd_y, buf, 10));
+
     // Insert a null in place of the checksum to denote end of string
     //oiMsgBuf[oiMsgBuf[OISERIAL_SIZE_IDX] - 1] = 0;
     lcd.setCursor(lcd_x, lcd_y);
-
     for (uint16_t charidx = OISERIAL_CMD_IDX + 2; charidx < oiMsgBuf[OISERIAL_SIZE_IDX] - 1; charidx++)
     {
       lcd.print(static_cast<char>(oiMsgBuf[charidx]));
     }
+    
 
-      /* char lcdbuf[21];
+    /* char lcdbuf[21];
     strcpy(lcdbuf, oiMsgBuf[OISERIAL_CMD_IDX + 2]);
     sprintf(lcdbuf, "%d chars", strlen(lcdbuf));
     lcd.print(lcdbuf); */

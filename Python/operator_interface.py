@@ -213,6 +213,7 @@ while True:
 
     for i in range(0, 1):
       setLED(i, OILEDState.LEDSTATE_MED)
-    setMessage(0, 0, "Test Message");
-
-    print ("It works")
+    setMessage(2, 0, "aaa"); 
+    #setMessage(0, 1, "bbbbbbbbbbbbbbbbbb22"); 
+    #setMessage(0, 2, "cccccccccccccccccc33");
+    #setMessage(0, 3, "dddddddddddddddddd44");
