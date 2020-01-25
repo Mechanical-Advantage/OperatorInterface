@@ -1,15 +1,20 @@
 #include "OISerialProtocol.h"
 #include "LEDState.h" 
-#include "src/lib/LiquidCrystal_I2C/LiquidCrystal_I2C.h"
+#include "src/lib/LiquidCrystal_I2C/LiquidCrystal_I2C.h" 
+#include "src/lib/FastLED/FastLED.h"
 
-#define BYTESREMAINING_NOT_SET_YET 0xff;  // Must be nonzero - large flag value
+#define BYTESREMAINING_NOT_SET_YET 0xff;  // Must be nonzero - large flag value 
+#define TIMEOUT 5000 //time in milliseconds
 
 byte oiMsgBuf[OISERIAL_MAX_MSG_SIZE];
 uint8_t oiMsgBufIdx = 0;
 uint8_t oiMsgBytesRemaining = BYTESREMAINING_NOT_SET_YET;
 //DECLARE_LEDSTATE_STORAGE_EXTERN;
 extern LiquidCrystal_I2C lcd;
+extern void pixelSetOne(byte pixel_id, byte pixel_r, byte pixel_g, byte pixel_b);
+extern void pixelSetAll(CRGB);
 
+unsigned long lastKeepAlive;
 void sendNack()
 {
   Serial.write(OISERIAL_NACK);
@@ -42,16 +47,33 @@ byte CRC8(const byte *data, byte len) {
   }
   return crc;
 }
-
+ 
+bool isSerialTimedOut() 
+{
+  if(millis() - lastKeepAlive > TIMEOUT) {
+    return true;
+  } 
+  else {
+    return false;
+  } 
+}
 void processCmd()
 {
   byte cmd = oiMsgBuf[OISERIAL_CMD_IDX];
   byte lcd_x;
   byte lcd_y;
-
+  byte pixel_id;
+  byte pixel_r;
+  byte pixel_g;
+  byte pixel_b;
+  CRGB color;
   //lcd.setCursor(0, 3);
-  //lcd.print("CMD:");
-  if (cmd == OISERIAL_CMD_LED_SET)
+  //lcd.print("CMD:");  
+
+  if (cmd == OISERIAL_CMD_NOOP) {
+    lastKeepAlive = millis(); 
+  }
+  else if (cmd == OISERIAL_CMD_LED_SET)
   {
     // This is an LED control command.  
     // The next 2 bytes indicate which LED and what value to set.
@@ -64,12 +86,6 @@ void processCmd()
     lcd_y = oiMsgBuf[OISERIAL_CMD_IDX + 1] & OISERIAL_LCD_Y_MASK;
     lcd_x = (oiMsgBuf[OISERIAL_CMD_IDX + 1] & OISERIAL_LCD_X_MASK) >> OISERIAL_LCD_X_RIGHT_SHIFT; 
 
-    char buf[20];
-    lcd.setCursor(3, 2);
-    lcd.print(itoa(lcd_x, buf, 10)); 
-
-    //lcd.setCursor(10, 2);
-    //lcd.print(itoa(lcd_y, buf, 10));
 
     // Insert a null in place of the checksum to denote end of string
     //oiMsgBuf[oiMsgBuf[OISERIAL_SIZE_IDX] - 1] = 0;
@@ -86,7 +102,22 @@ void processCmd()
     lcd.print(lcdbuf); */
     //lcd.print(String(oiMsgBuf[OISERIAL_CMD_IDX + 2]));
     
+  } 
+  else if (cmd == OISERIAL_CMD_PIXEL_SET) {
+    pixel_id = oiMsgBuf[OISERIAL_CMD_IDX + 1]; 
+    pixel_r = oiMsgBuf[OISERIAL_CMD_IDX + 2]; 
+    pixel_g = oiMsgBuf[OISERIAL_CMD_IDX + 3]; 
+    pixel_b = oiMsgBuf[OISERIAL_CMD_IDX + 4];
+    pixelSetOne(pixel_id, pixel_r, pixel_g, pixel_b);
   }
+
+  else if (cmd == OISERIAL_CMD_ALLPIXEL_SET) { 
+    color.r = oiMsgBuf[OISERIAL_CMD_IDX + 1]; 
+    color.g = oiMsgBuf[OISERIAL_CMD_IDX + 2]; 
+    color.b = oiMsgBuf[OISERIAL_CMD_IDX + 3];
+    pixelSetAll(color);
+  } 
+
   else
   {
     char buf[20];

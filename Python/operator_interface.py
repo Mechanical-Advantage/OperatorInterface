@@ -12,7 +12,9 @@ SERIAL_BAUD = 115200
 class OISerialCommand(Enum):
   NOOP = 0
   LED_SET = 1
-  LCD_MSG = 2
+  LCD_MSG = 2 
+  PIXEL_SET = 3
+  ALLPIXEL_SET = 4
 
 class OISerialResponse(Enum):
   ACK = 0xaa
@@ -48,18 +50,27 @@ def setLED(id, led_state):
 
 def setMessage(x, y, msg):
   payload = []
-  payload.append(x << OISERIAL_LCD_X_SHIFT & (y & OISERIAL_LCD_Y_MASK))
+  payload.append(x << OISERIAL_LCD_X_SHIFT | (y & OISERIAL_LCD_Y_MASK))
   payload += [bytes(character, encoding='ascii')[0] for character in msg] 
   print ("Payload'{}' " .format(payload[1:]))
   arduino.write(assembleMessage(OISerialCommand.LCD_MSG, payload))
   get_response()
 
 def setPixel(id, r, g, b):
-  pass
-  
+  payload = [id, r, g, b]
+  arduino.write(assembleMessage(OISerialCommand.PIXEL_SET, payload)) 
+  get_response() 
+
 def setAllPixel(r, g, b):
-  pass
-  
+  payload = [r, g, b]  
+  arduino.write(assembleMessage(OISerialCommand.ALLPIXEL_SET, payload))
+  get_response() 
+
+def keepAlive()   
+  payload = []
+  arduino.write(assembleMessage(OISerialCommand.NOOP, payload))
+  get_response()
+
 # common code
 def get_response():
   """
@@ -211,9 +222,12 @@ while True:
     if not arduino_connected:
         connect_to_arduino();
 
-    for i in range(0, 1):
+    for i in range(0, 20):
       setLED(i, OILEDState.LEDSTATE_MED)
-    setMessage(2, 0, "aaa"); 
-    #setMessage(0, 1, "bbbbbbbbbbbbbbbbbb22"); 
-    #setMessage(0, 2, "cccccccccccccccccc33");
-    #setMessage(0, 3, "dddddddddddddddddd44");
+    setMessage(5, 0, "aaa3"); 
+    setMessage(4, 1, "bbbbbbbbbb10"); 
+    setMessage(3, 2, "cccccccccccc12");
+    setMessage(2, 3, "dddddddddddddd14"); 
+
+    setPixel(2, 255, 0, 217);
+    #setAllPixel(42, 89, 87);

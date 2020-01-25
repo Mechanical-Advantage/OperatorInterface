@@ -146,6 +146,12 @@ void pixelSetAll(CRGB color)
 {
     fill_solid(pixel, NEOPIXEL_COUNT, color);
     FastLED.show();
+} 
+
+void pixelSetOne(byte pixel_id, byte pixel_r, byte pixel_g, byte pixel_b) 
+{ 
+    pixel[pixel_id].setRGB(pixel_r, pixel_g, pixel_b);
+    FastLED.show();
 }
 
 void updateLEDState()
