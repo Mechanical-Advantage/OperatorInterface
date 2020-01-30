@@ -34,7 +34,7 @@
 #define NEOPIXEL_PIN 9
 #define NEOPIXEL_COUNT 7
 #define NEOPIXEL_TYPE WS2812B
-#define NEOPIXEL_COLOR_ORDER GRB
+#define NEOPIXEL_COLOR_ORDER GRB 
 
 DECLARE_LEDSTATE_STORAGE;
 
@@ -284,7 +284,24 @@ void loop()
     EVERY_N_MILLISECONDS(LED_UPDATE_INTERVAL)
     {
         updateLEDState();
-    }
+    } 
+
+    EVERY_N_MILLISECONDS(KEEP_ALIVE_UPDATE)
+    {
+        static bool keepAliveState = false; 
+        if (isSerialTimedOut()) { 
+            lcd.clear();
+            lcd.setCursor(0, 0);
+            lcd.print("Protocol");
+            lcd.setCursor(0, 1);
+            lcd.print("Connection Lost"); 
+            keepAliveState = true;
+        } 
+        else if (keepAliveState == true) {
+            lcd.clear();
+            keepAliveState = false;
+        }
+    } 
 
     // E Stop
     if (!eStopPressed && !digitalRead(E_STOP_PIN))

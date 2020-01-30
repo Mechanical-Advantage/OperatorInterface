@@ -23,6 +23,10 @@ typedef enum
 #define MAX_PAYLOAD_SIZE 22 
 #define OISERIAL_START_IDX 0
 #define OISERIAL_SIZE_IDX 1
-#define OISERIAL_CMD_IDX 2
+#define OISERIAL_CMD_IDX 2 
+
+#define TIMEOUT 5000 //time in milliseconds 
+#define KEEP_ALIVE_UPDATE 1000 //EVERY_N_MILLISECONDS
 
 extern void readSerialData();
+extern bool isSerialTimedOut();

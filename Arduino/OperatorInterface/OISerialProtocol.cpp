@@ -4,7 +4,9 @@
 #include "src/lib/FastLED/FastLED.h"
 
 #define BYTESREMAINING_NOT_SET_YET 0xff;  // Must be nonzero - large flag value 
-#define TIMEOUT 5000 //time in milliseconds
+#define TIMEOUT 5000 //time in milliseconds 
+#define KEEP_ALIVE_UPDATE 1000 //EVERY_N_MILLISECONDS
+
 
 byte oiMsgBuf[OISERIAL_MAX_MSG_SIZE];
 uint8_t oiMsgBufIdx = 0;
@@ -14,7 +16,7 @@ extern LiquidCrystal_I2C lcd;
 extern void pixelSetOne(byte pixel_id, byte pixel_r, byte pixel_g, byte pixel_b);
 extern void pixelSetAll(CRGB);
 
-unsigned long lastKeepAlive;
+unsigned long lastKeepAlive = 0;
 void sendNack()
 {
   Serial.write(OISERIAL_NACK);
