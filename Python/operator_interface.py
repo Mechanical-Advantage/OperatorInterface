@@ -37,7 +37,7 @@ OISERIAL_LCD_X_MASK = 0xf8
 OISERIAL_LCD_Y_MASK = 0x07
 OISERIAL_LCD_X_SHIFT = 3
 
-last_value = []
+last_led_value = []
 arduino_connected = False
 
 #list of commands 
@@ -66,7 +66,7 @@ def setAllPixel(r, g, b):
   arduino.write(assembleMessage(OISerialCommand.ALLPIXEL_SET, payload))
   get_response() 
 
-def keepAlive()   
+def keepAlive():   
   payload = []
   arduino.write(assembleMessage(OISerialCommand.NOOP, payload))
   get_response()
@@ -166,28 +166,19 @@ def connect_to_arduino():
         print("Got serial exception")
         raise
         
-def update_values(table, key, value, isNew):
-    global last_value
+def update_led_values(table, key, value, isNew):
+    global last_led_value
     global arduino_connected
     diff = [] # Will have true if the bit changed
     serial_data = []
-    if len(last_value) < len(value):
-        last_value = [False]*len(value)
-    for old, new in zip(last_value, value):
-        diff.append(False if old == new else True)
-    byte_diff = [diff[i:i + 8-SET_BITS] for i in range(0, len(diff), 8-SET_BITS)]
-    send_bits = [value[i:i + 8-SET_BITS] for i in range(0, len(value), 8-SET_BITS)]
-    for index, item_diff, bits in zip(range(len(send_bits)), byte_diff, send_bits):
-        if True in item_diff:
-            # Ensure bits is of the proper length, must be list
-            bits = list(bits)
-            bits.extend([False]*((8-SET_BITS)-len(bits)))
-            byte_index = index<<8-SET_BITS
-            data_string = ''.join(['1' if x else '0' for x in bits])
-            serial_data.append(int(data_string, base=2)+byte_index)
-            print(index, data_string, sep=", ")
-    last_value = value
-    try:
+    if len(last_led_value) < len(value):
+        last_led_value = [0]*len(value) 
+    for i in range(0, len(value)):  
+      if last_led_value[i] != value[i]: 
+        last_led_value[i] = value[i]
+        setLed(i, value[i]) 
+
+    """ try:
         arduino.write(bytes(serial_data))
     except SerialException:
         if arduino_connected:
@@ -195,7 +186,7 @@ def update_values(table, key, value, isNew):
             print("Lost connection to Arduino")
     except NameError:
         # Arduino has not been connected to
-        pass
+        pass """
 
 connect_to_arduino()
 
@@ -208,26 +199,20 @@ while NetworkTables.getRemoteAddress() is None:
     sleep(1)
 print("Connected to NetworkTables")
 #table.addTableListener(update_values, immediateNotify=True, key="OI LEDs")
+table.addEntryListener(update_led_values, immediateNotify=True, key="LEDs")
+#table.addEntryListener(update_values, immediateNotify=True, key="LCD")
 
 lastStateConnected = True
 while True:
-    sleep(1)
-    """ if not lastStateConnected and NetworkTables.getRemoteAddress() is not None:
-        lastStateConnected = True
-        print("Re-connected to NetworkTables")
-    elif lastStateConnected and NetworkTables.getRemoteAddress() is None:
+  sleep(2)
+  if not lastStateConnected and NetworkTables.getRemoteAddress() is not None:
+      lastStateConnected = True
+      print("Re-connected to NetworkTables")
+  elif lastStateConnected and NetworkTables.getRemoteAddress() is None:
         lastStateConnected = False
-        print("Lost connection to NetworkTables") """
+        print("Lost connection to NetworkTables")
 
-    if not arduino_connected:
-        connect_to_arduino();
+  if not arduino_connected:
+      connect_to_arduino();
 
-    for i in range(0, 20):
-      setLED(i, OILEDState.LEDSTATE_MED)
-    setMessage(5, 0, "aaa3"); 
-    setMessage(4, 1, "bbbbbbbbbb10"); 
-    setMessage(3, 2, "cccccccccccc12");
-    setMessage(2, 3, "dddddddddddddd14"); 
-
-    setPixel(2, 255, 0, 217);
-    #setAllPixel(42, 89, 87);
+  keepAlive(); 
