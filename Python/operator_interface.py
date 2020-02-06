@@ -44,7 +44,7 @@ arduino_connected = False
 def setLED(id, led_state):
   payload = []
   payload.append(id)
-  payload.append(led_state.value)
+  payload.append(led_state)
   arduino.write(assembleMessage(OISerialCommand.LED_SET, payload))
   get_response()
 
@@ -167,16 +167,18 @@ def connect_to_arduino():
         raise
         
 def update_led_values(table, key, value, isNew):
-    global last_led_value
+    global last_led_value 
     global arduino_connected
     diff = [] # Will have true if the bit changed
     serial_data = []
-    if len(last_led_value) < len(value):
+    print("Update Led Value", key, value)
+    if len(last_led_value) < len(value): 
         last_led_value = [0]*len(value) 
     for i in range(0, len(value)):  
       if last_led_value[i] != value[i]: 
-        last_led_value[i] = value[i]
-        setLed(i, value[i]) 
+        last_led_value[i] = int(value[i])
+        setLED(i, int(value[i]))  
+        
 
     """ try:
         arduino.write(bytes(serial_data))
@@ -193,7 +195,7 @@ connect_to_arduino()
 # NetworkTables setup
 NetworkTables.initialize(server=NTSERVER)
 #NetworkTables.enableVerboseLogging()
-table = NetworkTables.getTable("LEDs")
+table = NetworkTables.getTable("OperatorInterface")
 print("Connecting to NetworkTables...")
 while NetworkTables.getRemoteAddress() is None:
     sleep(1)
