@@ -171,13 +171,32 @@ def update_led_values(table, key, value, isNew):
     global arduino_connected
     diff = [] # Will have true if the bit changed
     serial_data = []
-    print("Update Led Value", key, value)
     if len(last_led_value) < len(value): 
         last_led_value = [0]*len(value) 
     for i in range(0, len(value)):  
       if last_led_value[i] != value[i]: 
         last_led_value[i] = int(value[i])
         setLED(i, int(value[i]))  
+
+def update_lcd_values_entry(source, key, value, isNew): 
+    global last_x_value  
+    global last_y_value 
+    global last_length_value 
+    global last_string_value
+    global arduino_connected 
+    diff = [] 
+    serial_data = [] 
+    print("Update LCD value", "source", source, "key", key, "value", value)   
+    subtable_entries = {  
+      "X": "", 
+      "Y": "", 
+      "Length": "",  
+      "String": "",
+    } 
+    for entry in subtable_entries: 
+      if last_lcd_value[entry] != value[entry] 
+      last_lcd_value[entry] = value[entry]
+    
         
 
     """ try:
@@ -195,14 +214,19 @@ connect_to_arduino()
 # NetworkTables setup
 NetworkTables.initialize(server=NTSERVER)
 #NetworkTables.enableVerboseLogging()
-table = NetworkTables.getTable("OperatorInterface")
+table = NetworkTables.getTable("OperatorInterface") 
+lcd_table = NetworkTables.getTable("OperatorInterface/LCD")
 print("Connecting to NetworkTables...")
 while NetworkTables.getRemoteAddress() is None:
     sleep(1)
-print("Connected to NetworkTables")
+print("Connected to NetworkTables") 
+for subtable in lcd_table.getSubTables():  
+  print(subtable)
+  NetworkTables.getTable("OperatorInterface/LCD/" + subtable).addEntryListener(update_lcd_values_entry, immediateNotify=True) 
+
 #table.addTableListener(update_values, immediateNotify=True, key="OI LEDs")
 table.addEntryListener(update_led_values, immediateNotify=True, key="LEDs")
-#table.addEntryListener(update_values, immediateNotify=True, key="LCD")
+#lcd_table.addEntryListener(update_lcd_values_entry, immediateNotify=True)
 
 lastStateConnected = True
 while True:
