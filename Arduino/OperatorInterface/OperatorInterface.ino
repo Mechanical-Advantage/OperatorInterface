@@ -35,6 +35,9 @@
 #define NEOPIXEL_TYPE WS2812B
 #define NEOPIXEL_COLOR_ORDER GRB
 
+#define setPixelsAll (RGB_VALUE)
+#define setPixelsOne (NEOPIXEL_PIN, red, green, blue)  //no idea if this works
+
 Joystick_ Joystick = Joystick_(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_GAMEPAD, BUTTON_COUNT, 0, true,
                                true, true, true, true, true, false, false, false, false, false);
 typedef void (Joystick_::*joystickFunc)(int16_t);
@@ -109,8 +112,8 @@ void setup()
     SET_ALL_LEDS_OFF;
     updateLEDState();
 
-    // Light up the neopixels (test)
-    pixelTest();
+    //Light up the neopixels (test)
+    pixelTest(); //only pixel test is commented out, not necesary for colorChange
 
     // Test all the possible LED states
     SET_LEDSTATE(14, LEDSTATE_DIM);
@@ -125,25 +128,185 @@ void setup()
     SET_LEDSTATE(9, LEDSTATE_PULSE_FAST);
 }
 
-void pixelTest(void)
+static pixelTest()
+//make this a loop
+//x==0                      //get x to work for loop
 {
-    pixel[0].setRGB(0, 150, 0);
-    pixel[1].setRGB(150, 0, 0);
-    pixel[2].setRGB(0, 0, 150);
-    pixel[3].setRGB(150, 150, 0);
-    pixel[4].setRGB(0, 150, 150);
-    pixel[5].setRGB(150, 0, 150);
-    pixel[6].setRGB(150, 150, 150);
-    FastLED.show();
+
+    static int x;
+
+    switch (x)
+
+    {
+
+    case 0:
+        pixel[0].setRGB(150, 150, 150); // 1/2 second delay, was bright pastel colors   
+        FastLED.show();
+        break;
+    case 1:
+        pixel[0].setRGB(0, 0, 0);
+        pixel[1].setRGB(150, 0, 0);
+        FastLED.show();
+        break;
+    case 2:
+        pixel[1].setRGB(0, 0, 0);
+        pixel[2].setRGB(125, 25, 0);
+        FastLED.show();
+        break;
+    case 3:
+        pixel[2].setRGB(0, 0, 0);
+        pixel[3].setRGB(100, 125, 0);
+        FastLED.show();
+        break;
+    case 4:
+        pixel[3].setRGB(0, 0, 0);
+        pixel[4].setRGB(0, 150, 0);
+        FastLED.show();
+        break;
+    case 5:
+        pixel[4].setRGB(0, 0, 0);
+        pixel[5].setRGB(0, 0, 150);
+        FastLED.show();
+        break;
+    case 6:
+        pixel[5].setRGB(0, 0, 0);
+        pixel[6].setRGB(25, 0, 75);
+        FastLED.show();
+        break;
+    case 7:
+        pixel[6].setRGB(0, 0, 0);
+        FastLED.show();
+        break;
+    }
+    x = x + 1;
+//   if (x == 8)
+}
+     
+
+ static Auto()
+{
+
+    static int a;
+
+    switch (a)
+
+    {
+
+    case 0:
+        pixel[0].setRGB(0, 17, 25);
+        pixel[1].setRGB(0, 17, 25);
+        pixel[2].setRGB(0, 17, 25);
+        pixel[3].setRGB(0, 17, 25);
+        pixel[4].setRGB(0, 17, 25);
+        pixel[5].setRGB(0, 17, 25);
+        pixel[6].setRGB(0, 17, 25);
+        FastLED.show();
+        break;
+    case 1:
+        pixel[1].setRGB(0, 0, 0);
+        FastLED.show();
+        break;
+    case 2:
+        pixel[2].setRGB(0, 0, 0);
+        FastLED.show();
+        break;
+    case 3:
+        pixel[3].setRGB(0, 0, 0);
+        FastLED.show();
+        break;
+    case 4:
+        pixel[4].setRGB(0, 0, 0);
+        FastLED.show();
+        break;
+    case 5:
+        pixel[5].setRGB(0, 0, 0);
+        FastLED.show();
+        break;
+    case 6:
+        pixel[6].setRGB(0, 0, 0);
+        FastLED.show();
+        break;
+    case 7:
+        pixel[0].setRGB(0, 0, 0);
+        FastLED.show();
+        break;
+    }
+    a = a + 1;
 }
 
+ static Controlled()
+{
+
+    static int b;
+
+    switch (b)
+
+    {
+
+    case 0:
+        pixel[0].setRGB(0, 50, 0);
+        pixel[1].setRGB(0, 50, 0);
+        pixel[2].setRGB(0, 50, 0);
+        pixel[3].setRGB(0, 50, 0);
+        pixel[4].setRGB(0, 50, 0);
+        pixel[5].setRGB(0, 50, 0);
+        pixel[6].setRGB(0, 50, 0);
+        FastLED.show();
+        break;
+    case 1:
+        pixel[1].setRGB(0, 50, 0);
+        FastLED.show();
+        break;
+    case 2:
+        pixel[2].setRGB(0, 50, 0);
+        FastLED.show();
+        break;
+    case 3:
+        pixel[3].setRGB(0, 50, 0);
+        FastLED.show();
+        break;
+    case 4:
+        pixel[4].setRGB(0, 50, 0);
+        FastLED.show();
+        break;
+    case 5:
+        pixel[5].setRGB(0, 50, 0);
+        FastLED.show();
+        break;
+    case 6:
+        pixel[6].setRGB(0, 50, 0);
+        FastLED.show();
+        break;
+    case 7:
+        pixel[0].setRGB(0, 50, 0);
+        FastLED.show();
+        break;
+    }
+    b = b + 1;
+}
+
+//(0, 100, 0) //green rgb pattern
 void pixelSetAll(CRGB color)
 {
     fill_solid(pixel, NEOPIXEL_COUNT, color);
     FastLED.show();
 }
 
-void updateLEDState()
+
+//static call() pixelFill
+    //void pixelFill(CRGB color)
+    //{
+    //    fill_all(color);
+    //    FastLED.show();
+    //}
+
+    //void pixelSetOne(CRGB color)
+    //{
+    //    fill_one(pixel, color);
+    //    FastLED.show();
+    //}
+
+    void updateLEDState()
 {
     static bool blinkSlowState, blinkFastState;
     static uint8_t slowCount, fastCount;
@@ -259,10 +422,10 @@ void loop()
         (Joystick.*axisFuncs[input])(analogRead(input));
     }
 
-    EVERY_N_MILLISECONDS(100)
+    EVERY_N_MILLISECONDS(100) //Milisecond tick rate
     {
         lcd.setCursor(0, 3);
-        sprintf(line, "%4d %4d %4d %4d", analogRead(0), analogRead(1), analogRead(2), analogRead(3));
+        sprintf(line, "%4d %4d %4d %4d", analogRead(0), analogRead(1), analogRead(2), analogRead(3)); //slides
         lcd.print(line);
     }
 
@@ -271,6 +434,21 @@ void loop()
     EVERY_N_MILLISECONDS(LED_UPDATE_INTERVAL)
     {
         updateLEDState();
+    }
+
+    EVERY_N_MILLISECONDS(200)
+    {
+        pixelTest();
+    }
+
+    EVERY_N_MILLISECONDS(4285)
+    {
+        Auto();
+    }
+
+    EVERY_N_MILLISECONDS(22142)
+    {
+        Controlled();
     }
 
     // E Stop
