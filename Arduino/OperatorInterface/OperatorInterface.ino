@@ -182,7 +182,20 @@ static pixelTest()
 //   if (x == 8)
 }
      
+//enum neopixelState
+//None, Auto, Tele
+//enum timer {
+  //None,
+  //Auto,
+  //Teleop,
+  //Rush,
+//};
 
+
+//string timer = auto
+
+//if (timer==auto)
+//{
  static Auto()
 {
 
@@ -232,7 +245,7 @@ static pixelTest()
         break;
     }
     a = a + 1;
-}
+    };
 
  static Controlled()
 {
