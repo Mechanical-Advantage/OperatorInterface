@@ -37,7 +37,8 @@ OISERIAL_LCD_X_MASK = 0xf8
 OISERIAL_LCD_Y_MASK = 0x07
 OISERIAL_LCD_X_SHIFT = 3
 
-last_led_value = []
+last_led_value = [] 
+subtable_entries = {}
 arduino_connected = False
 
 #list of commands 
@@ -179,23 +180,22 @@ def update_led_values(table, key, value, isNew):
         setLED(i, int(value[i]))  
 
 def update_lcd_values_entry(source, key, value, isNew): 
-    global last_x_value  
-    global last_y_value 
-    global last_length_value 
-    global last_string_value
+    global subtable_entries 
+    global last_lcd_value
     global arduino_connected 
     diff = [] 
     serial_data = [] 
     print("Update LCD value", "source", source, "key", key, "value", value)   
-    subtable_entries = {  
-      "X": "", 
-      "Y": "", 
-      "Length": "",  
-      "String": "",
-    } 
-    for entry in subtable_entries: 
-      if last_lcd_value[entry] != value[entry] 
-      last_lcd_value[entry] = value[entry]
+    for key in subtable_entries: 
+      if subx_value[key] != value[key]:  
+        lcd.clear() 
+        last_lcd_value[entry] = value[entry]  
+    for key in subtable_entries: 
+      if last_length_value[entry] > value[entry]:
+      lcd.append() 
+      else if last_length_value[entry] <= value[entry]: 
+      last_length_value[entry] = value[entry] 
+      
     
         
 
@@ -223,7 +223,7 @@ print("Connected to NetworkTables")
 for subtable in lcd_table.getSubTables():  
   print(subtable)
   NetworkTables.getTable("OperatorInterface/LCD/" + subtable).addEntryListener(update_lcd_values_entry, immediateNotify=True) 
-
+  subtable_entries.update({subtable: {"X":"", "Y":"", "Length":"", "String":""}})
 #table.addTableListener(update_values, immediateNotify=True, key="OI LEDs")
 table.addEntryListener(update_led_values, immediateNotify=True, key="LEDs")
 #lcd_table.addEntryListener(update_lcd_values_entry, immediateNotify=True)
@@ -240,5 +240,6 @@ while True:
 
   if not arduino_connected:
       connect_to_arduino();
-
+ 
+  setMessage(0,0, "wow")
   keepAlive(); 
