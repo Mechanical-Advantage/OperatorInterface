@@ -2,5 +2,5 @@
     "board": "arduino:avr:leonardo",
     "sketch": "Arduino/OperatorInterface/OperatorInterface.ino",
     "output": "Arduino/build",
-    "port": "COM3"
+    "port": "COM7"
 }

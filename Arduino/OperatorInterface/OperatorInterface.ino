@@ -289,17 +289,23 @@ void loop()
     EVERY_N_MILLISECONDS(KEEP_ALIVE_UPDATE)
     {
         static bool keepAliveState = false; 
-        if (isSerialTimedOut()) { 
-            lcd.clear();
-            lcd.setCursor(0, 0);
-            lcd.print("Protocol");
-            lcd.setCursor(0, 1);
-            lcd.print("Connection Lost"); 
-            keepAliveState = true;
-        } 
-        else if (keepAliveState == true) {
-            lcd.clear();
-            keepAliveState = false;
+        if (isSerialTimedOut()) {
+            if (!keepAliveState) { 
+                lcd.clear();
+                lcd.setCursor(0, 0);
+                lcd.print("* No data received *");
+                lcd.setCursor(0, 1);
+                lcd.print("*  from computer   *");
+                lcd.setCursor(0, 3);
+                lcd.print("(Is script running?)");
+                keepAliveState = true;
+            }
+        }   
+        else {
+            if (keepAliveState) {
+                lcd.clear();
+                keepAliveState = false;
+            }   
         }
     } 
 
