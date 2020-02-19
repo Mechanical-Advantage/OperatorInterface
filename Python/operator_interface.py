@@ -62,6 +62,7 @@ OISERIAL_LCD_X_SHIFT = 3
 last_led_value = []
 last_lcd_value = {}
 arduino_connected = False
+arduino = None
 
 def arduinoWrite(serial_data):
   global arduino_connected
@@ -123,6 +124,7 @@ def get_response():
   Returns: tuple of response value (ACK/NACK or None) and list holding extra data
   """
   global arduino_connected
+  global arduino
   resp_data = []
   resp_status = None
   resp_val = OISerialResponse.NACK.value # Fail by default
@@ -210,34 +212,46 @@ def calcCRC8(msg):
   return crc
 
 def connect_to_arduino():
-    print("Connecting to Arduino")
-    # serial port setup
-    try:
-        global arduino
-        arduino = Serial(SERIAL_PORT, SERIAL_BAUD)
-        arduino.reset_input_buffer()
-        # opening connection causes Arduino to reset and not receive data for a few seconds
-        sleep(2)
-        global arduino_connected
-        arduino_connected = True
-        print("Connected to Arduino")
-        global last_value
-        last_value = [] # Force resend of all LEDs
-        global table
-        global lcd_table
-        keepAlive()
-        try:
-            update_led_values(table, "LEDs", table.getNumberArray("LEDs", 0), False)
-            for subtable in lcd_table.getSubTables():
-              update_lcd_values_entry(subtable, "", "", false)
-        except NameError:
-            # Before NT init
-            pass
-    except SerialException:
-        print("Got serial exception")
-        #raise
+  global arduino
+  global arduino_connected
+  print("Connecting to Arduino")
+  # serial port setup
+  try:
+    arduino = Serial(SERIAL_PORT, SERIAL_BAUD)
+    arduino.reset_input_buffer()
+    # opening connection causes Arduino to reset and not receive data for a few seconds
+    sleep(2)
+    arduino_connected = True
+    print("Connected to Arduino")
+    refresh_status()
 
-def update_led_values(table, key, value, isNew):
+  except SerialException:
+    print("Got serial exception - check USB connection")
+
+
+def refresh_status():
+  """
+  Force a refresh of all of the output status.
+  This is needed after the Arduino reconnects.
+  """
+  global table
+  global lcd_table
+  # Send a keepAlive so the Arduino knows we're connected and will clear 
+  # any "not connected" message
+  keepAlive()
+  # Invoke the handlers that actually carry out the updates.  Set the "force" kwarg 
+  # so that they will always resend data even if it hasn't changed from previous values.
+  try:
+    update_led_values(table, "LEDs", table.getNumberArray("LEDs", 0), False, force=True)
+    for subtable in lcd_table.getSubTables():
+      update_lcd_values_entry(NetworkTables.getTable("OperatorInterface/LCD/" + subtable),
+                              "", "", False, force=True)
+  except NameError:
+    # Before NT init
+    pass
+
+
+def update_led_values(table, key, value, isNew, force=False):
     """
     Update LEDs to correct state according to current values.
     """
@@ -245,12 +259,12 @@ def update_led_values(table, key, value, isNew):
     if len(last_led_value) < len(value):
         last_led_value = [0]*len(value)
     for i in range(0, len(value)):
-      if last_led_value[i] != value[i]:
+      if last_led_value[i] != value[i] or force:
         last_led_value[i] = int(value[i])
         setLED(i, int(value[i]))
 
 
-def update_lcd_values_entry(source, key, value, isNew):
+def update_lcd_values_entry(source, key, value, isNew, force=False):
     """Update an LCD text field to current value.
 
     This function compares the field's attributes (location and length) 
@@ -271,7 +285,9 @@ def update_lcd_values_entry(source, key, value, isNew):
       return
 
     newdata = {}
-    field_propchange = False
+    # If "force" is in effect, we pretend there's a property change to force
+    # a redraw to occur.
+    field_propchange = force
     for attr in ['X', 'Y', 'Length']:
       # Networktables provides floating point, cast these to integers
       newdata[attr] = int(source.getValue(attr, 0))
