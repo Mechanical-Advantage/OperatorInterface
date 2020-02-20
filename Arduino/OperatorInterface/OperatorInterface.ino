@@ -181,22 +181,34 @@ static pixelTest()
     x = x + 1;
 //   if (x == 8)
 }
-     
-//enum neopixelState
-//None, Auto, Tele
-//enum timer {
-  //None,
-  //Auto,
-  //Teleop,
-  //Rush,
-//};
+                                                                    //********  
+enum neopixelState{   
+None, Auto, Tele, End
+};
+
+ void neopixelNone()
+{
+    static int h;
+
+    switch (h)
+    {
+        case 0:
+        pixel[0].setRGB(0, 0, 0);
+        pixel[1].setRGB(0, 0, 0);
+        pixel[2].setRGB(0, 0, 0);
+        pixel[3].setRGB(0, 0, 0);
+        pixel[4].setRGB(0, 0, 0);
+        pixel[5].setRGB(0, 0, 0);
+        pixel[6].setRGB(0, 0, 0);
+        FastLED.show();
+        break;
+        }
+    h = h + 1;
+};
 
 
-//string timer = auto
 
-//if (timer==auto)
-//{
- static Auto()
+ void neopixelauto()
 {
 
     static int a;
@@ -247,7 +259,8 @@ static pixelTest()
     a = a + 1;
     };
 
- static Controlled()
+
+ void neopixelControlled()
 {
 
     static int b;
@@ -298,6 +311,56 @@ static pixelTest()
     b = b + 1;
 }
 
+void neopixelEnd()
+{
+
+    static int g;
+
+    switch (g)
+
+    {
+
+    case 0:
+        pixel[0].setRGB(70, 45, 0);
+        pixel[1].setRGB(70, 45, 0);
+        pixel[2].setRGB(70, 45, 0);
+        pixel[3].setRGB(70, 45, 0);
+        pixel[4].setRGB(70, 45, 0);
+        pixel[5].setRGB(70, 45, 0);
+        pixel[6].setRGB(70, 45, 0);
+        FastLED.show();
+        break;
+    case 1:
+        pixel[1].setRGB(0, 0, 0);
+        FastLED.show();
+        break;
+    case 2:
+        pixel[2].setRGB(0, 0, 0);
+        FastLED.show();
+        break;
+    case 3:
+        pixel[3].setRGB(0, 0, 0);
+        FastLED.show();
+        break;
+    case 4:
+        pixel[4].setRGB(0, 0, 0);
+        FastLED.show();
+        break;
+    case 5:
+        pixel[5].setRGB(0, 0, 0);
+        FastLED.show();
+        break;
+    case 6:
+        pixel[6].setRGB(0, 0, 0);
+        FastLED.show();
+        break;
+    case 7:
+        pixel[0].setRGB(0, 0, 0);
+        FastLED.show();
+        break;
+    }
+    g = g + 1;
+    };
 //(0, 100, 0) //green rgb pattern
 void pixelSetAll(CRGB color)
 {
@@ -454,14 +517,24 @@ void loop()
         pixelTest();
     }
 
+    EVERY_N_MILLISECONDS(100)
+    {
+        neopixelNone();
+    }
+
     EVERY_N_MILLISECONDS(4285)
     {
-        Auto();
+        neopixelauto();
     }
 
     EVERY_N_MILLISECONDS(22142)
     {
-        Controlled();
+        neopixelControlled();
+    }
+
+    EVERY_N_MILLISECONDS(4285)
+    {
+        neopixelEnd();
     }
 
     // E Stop
