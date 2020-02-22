@@ -36,10 +36,14 @@
 #define NEOPIXEL_TYPE WS2812B
 #define NEOPIXEL_COLOR_ORDER GRB
 
+#define MCP_PRIMARY_BUTTONS ((BUTTON_COUNT / 2) - DIRECT_BUTTON_COUNT)
+
 DECLARE_LEDSTATE_STORAGE;
 
-Joystick_ Joystick = Joystick_(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_GAMEPAD, BUTTON_COUNT, 0, true,
+Joystick_ primaryJoystick = Joystick_(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_GAMEPAD, BUTTON_COUNT/2, 0, true,
                                true, true, true, true, true, false, false, false, false, false);
+Joystick_ secondaryJoystick = Joystick_(0x04, JOYSTICK_TYPE_GAMEPAD, BUTTON_COUNT/2, 0, false,
+                               false, false, false, false, false, false, false, false, false, false);
 typedef void (Joystick_::*joystickFunc)(int16_t);
 const joystickFunc axisFuncs[] = {&Joystick_::setXAxis, &Joystick_::setYAxis, &Joystick_::setZAxis, &Joystick_::setRxAxis,
                                   &Joystick_::setRyAxis, &Joystick_::setRzAxis};
@@ -90,7 +94,8 @@ void setup()
 
     Serial.begin(SERIAL_BAUD_RATE);
     Keyboard.begin();
-    Joystick.begin(false);
+    primaryJoystick.begin(false);
+    secondaryJoystick.begin(false);
 
     tlc->begin();
 
@@ -225,7 +230,7 @@ void loop()
     // Directly connected buttons (1-8)
     for (button = 0; button < DIRECT_BUTTON_COUNT; button++)
     {
-        Joystick.setButton(button, !digitalRead(button2input[button]));
+        primaryJoystick.setButton(button, !digitalRead(button2input[button]));
         if (button < 6)
         {
             SET_LEDSTATE(button, (!digitalRead(button2input[button])) ? LEDSTATE_ON : LEDSTATE_OFF);
@@ -247,7 +252,10 @@ void loop()
             if (localIntF & _BV(button))
             {
                 uint8_t shiftVal = button > 7 ? 8 : 0;
-                Joystick.setButton(mcpPinToButton(button) + DIRECT_BUTTON_COUNT, !((localIntCap & _BV(button)) >> shiftVal));
+                bool isPrimaryJoystick = mcpPinToButton(button) < MCP_PRIMARY_BUTTONS;
+                Joystick_* joystick = isPrimaryJoystick ? &primaryJoystick : &secondaryJoystick;
+                joystick->setButton(isPrimaryJoystick ? mcpPinToButton(button) + DIRECT_BUTTON_COUNT : mcpPinToButton(button) - 
+                    MCP_PRIMARY_BUTTONS, !((localIntCap & _BV(button)) >> shiftVal));
             }
         }
     }
@@ -263,7 +271,7 @@ void loop()
     // The default axis range is 0-1023, which matches the ADC
     for (byte input = 0; input < ANALOG_INPUT_COUNT; input++)
     {
-        (Joystick.*axisFuncs[input])(analogRead(input));
+        (primaryJoystick.*axisFuncs[input])(analogRead(input));
     }
 
    /*  EVERY_N_MILLISECONDS(100)
@@ -273,7 +281,8 @@ void loop()
         lcd.print(line);
     } */
 
-    Joystick.sendState();
+    primaryJoystick.sendState();
+    secondaryJoystick.sendState();
 
     EVERY_N_MILLISECONDS(LED_UPDATE_INTERVAL)
     {
@@ -307,7 +316,10 @@ void readAllMCPButtons()
     for (byte mcpPin = 0; mcpPin < 16; mcpPin++)
     {
         uint8_t shiftVal = mcpPin > 7 ? 8 : 0;
-        Joystick.setButton(mcpPinToButton(mcpPin) + DIRECT_BUTTON_COUNT, (_BV(mcpPin) & values) >> shiftVal);
+        bool isPrimaryJoystick = mcpPinToButton(mcpPin) < MCP_PRIMARY_BUTTONS;
+        Joystick_* joystick = isPrimaryJoystick ? &primaryJoystick : &secondaryJoystick;
+        joystick->setButton(isPrimaryJoystick ? mcpPinToButton(mcpPin) + DIRECT_BUTTON_COUNT : mcpPinToButton(mcpPin) - 
+            MCP_PRIMARY_BUTTONS, (_BV(mcpPin) & values) >> shiftVal);
     }
 }
 
