@@ -34,7 +34,7 @@
 #define NEOPIXEL_PIN 9
 #define NEOPIXEL_COUNT 7
 #define NEOPIXEL_TYPE WS2812B
-#define NEOPIXEL_COLOR_ORDER GRB
+#define NEOPIXEL_COLOR_ORDER GRB 
 
 #define MCP_PRIMARY_BUTTONS ((BUTTON_COUNT / 2) - DIRECT_BUTTON_COUNT)
 
@@ -150,6 +150,12 @@ void pixelTest(void)
 void pixelSetAll(CRGB color)
 {
     fill_solid(pixel, NEOPIXEL_COUNT, color);
+    FastLED.show();
+} 
+
+void pixelSetOne(byte pixel_id, byte pixel_r, byte pixel_g, byte pixel_b) 
+{ 
+    pixel[pixel_id].setRGB(pixel_r, pixel_g, pixel_b);
     FastLED.show();
 }
 
@@ -287,7 +293,30 @@ void loop()
     EVERY_N_MILLISECONDS(LED_UPDATE_INTERVAL)
     {
         updateLEDState();
-    }
+    } 
+
+    EVERY_N_MILLISECONDS(KEEP_ALIVE_UPDATE)
+    {
+        static bool keepAliveState = false; 
+        if (isSerialTimedOut()) {
+            if (!keepAliveState) { 
+                lcd.clear();
+                lcd.setCursor(0, 0);
+                lcd.print("* No data received *");
+                lcd.setCursor(0, 1);
+                lcd.print("*  from computer   *");
+                lcd.setCursor(0, 3);
+                lcd.print("(Is script running?)");
+                keepAliveState = true;
+            }
+        }   
+        else {
+            if (keepAliveState) {
+                lcd.clear();
+                keepAliveState = false;
+            }   
+        }
+    } 
 
     // E Stop
     if (!eStopPressed && !digitalRead(E_STOP_PIN))
