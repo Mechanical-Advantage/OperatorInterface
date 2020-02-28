@@ -237,10 +237,10 @@ void loop()
     for (button = 0; button < DIRECT_BUTTON_COUNT; button++)
     {
         primaryJoystick.setButton(button, !digitalRead(button2input[button]));
-        if (button < 6)
+        /* if (button < 6)
         {
             SET_LEDSTATE(button, (!digitalRead(button2input[button])) ? LEDSTATE_ON : LEDSTATE_OFF);
-        }
+        } */
     }
 
 // MCP23017 expander inputs
