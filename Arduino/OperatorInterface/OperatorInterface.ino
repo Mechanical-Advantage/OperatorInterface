@@ -12,6 +12,7 @@
 #define FIRST_BUTTON_PIN 1
 #define DIRECT_BUTTON_COUNT 8
 #define ANALOG_INPUT_COUNT 6
+#define BRIGHTNESS_SCALER_INPUT 2
 #define MCP_INTERUPT_PIN 0
 #define MCP_ADDR 0x20
 #define SERIAL_BAUD_RATE 115200
@@ -166,6 +167,9 @@ void updateLEDState()
     static uint16_t pulseSlowVal, pulseFastVal;
     uint8_t state;
 
+    double brightnessScaler = (double) analogRead(BRIGHTNESS_SCALER_INPUT) / 1023;
+    brightnessScaler = brightnessScaler * brightnessScaler;
+
     slowCount++;
     fastCount++;
     if (slowCount > LED_SLOW_INTERVAL_COUNT)
@@ -200,25 +204,25 @@ void updateLEDState()
             tlc->setPWM(led, 0);
             break;
         case LEDSTATE_ON:
-            tlc->setPWM(led, LED_PWM_MAX);
+            tlc->setPWM(led, LED_PWM_MAX * brightnessScaler);
             break;
         case LEDSTATE_DIM:
-            tlc->setPWM(led, LED_PWM_DIM);
+            tlc->setPWM(led, LED_PWM_DIM * brightnessScaler);
             break;
         case LEDSTATE_MED:
-            tlc->setPWM(led, LED_PWM_MED);
+            tlc->setPWM(led, LED_PWM_MED * brightnessScaler);
             break;
         case LEDSTATE_BLINK_FAST:
-            tlc->setPWM(led, blinkFastState * LED_PWM_MAX);
+            tlc->setPWM(led, blinkFastState * LED_PWM_MAX * brightnessScaler);
             break;
         case LEDSTATE_BLINK_SLOW:
-            tlc->setPWM(led, blinkSlowState * LED_PWM_MAX);
+            tlc->setPWM(led, blinkSlowState * LED_PWM_MAX * brightnessScaler);
             break;
         case LEDSTATE_PULSE_FAST:
-            tlc->setPWM(led, pulseFastVal);
+            tlc->setPWM(led, pulseFastVal * brightnessScaler);
             break;
         case LEDSTATE_PULSE_SLOW:
-            tlc->setPWM(led, pulseSlowVal);
+            tlc->setPWM(led, pulseSlowVal * brightnessScaler);
             break;
         }
     }
